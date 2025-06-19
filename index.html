@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>In Your Pantry</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="fontawesome/css/all.css">
+</head>
+<body>
+    <h1>In Your Pantry</h1>
+    <div id="search-form">
+        <div id="ingredient-chips"></div>
+        <input type="text" id="ingredient-input" placeholder="Add ingredient..." list="ingredient-suggestions">
+        <datalist id="ingredient-suggestions"></datalist>
+        <!-- Dietary preferences dropdown -->
+        <select id="diet-select">
+            <option value="">Any Diet</option>
+            <option value="vegetarian">Vegetarian</option>
+            <option value="vegan">Vegan</option>
+            <option value="pescetarian">Pescetarian</option>
+            <option value="ketogenic">Ketogenic</option>
+            <option value="paleo">Paleo</option>
+            <option value="gluten free">Gluten Free</option>
+            <option value="dairy free">Dairy Free</option>
+            <option value="low fodmap">Low FODMAP</option>
+        </select>
+        <!-- Calories input -->
+        <input type="number" id="max-calories" placeholder="Max Calories" min="0" style="width:110px;">
+        <button id="search-button" onclick="searchRecipes()">Search</button>
+        <button id="show-shopping-list" type="button">Shopping List</button>
+    </div>
+    <div id="results"></div>
+    <div id="pagination"></div>
+    <div id="recipe-details">
+        <div id="recipe-modal">
+            <div id="statusBar">
+                <span>
+                    <i id="close-button" onclick="closeRecipeDetails()" class="fas fa-window-close"></i>
+                </span>
+            </div>
+            <div id="recipe-content"></div>
+        </div>
+    </div>
+    <!-- Shopping List Modal -->
+    <div id="shopping-list-modal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; z-index:200; background:rgba(34,34,59,0.18); justify-content:center; align-items:center;">
+        <div style="background:#fff; border-radius:18px; width:90vw; max-width:400px; box-shadow:0 8px 32px 0 rgba(58,12,163,0.18); overflow:hidden; display:flex; flex-direction:column;">
+            <div style="display:flex; justify-content:space-between; align-items:center; background:#3a0ca3; color:#fff; padding:12px 18px;">
+                <span style="font-weight:bold;">Shopping List</span>
+                <button id="close-shopping-list" style="background:none; border:none; color:#fff; font-size:1.5rem; cursor:pointer;">&times;</button>
+            </div>
+            <div id="shopping-list-content" style="padding:20px; min-height:80px;"></div>
+        </div>
+    </div>
+    <script src="main.js"></script>
+</body>
+</html>
