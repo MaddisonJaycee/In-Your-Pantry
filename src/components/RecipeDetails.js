@@ -25,12 +25,12 @@ function RecipeDetails({ ingredients, userPantry, onAddMissing, image, diets, nu
       )}
       {/* Show diets and calories */}
       {diets && diets.length > 0 && (
-        <div style={{ fontSize: '1rem', color: '#3a0ca3', marginBottom: 8 }}>
+        <div style={{ fontSize: '1rem', color: '#ff9800', marginBottom: 8 }}>
           Diets: {diets.join(', ')}
         </div>
       )}
       {nutrition && nutrition.nutrients && (
-        <div style={{ fontSize: '1rem', color: '#1976d2', marginBottom: 8 }}>
+        <div style={{ fontSize: '1rem', color: '#8bc34a', marginBottom: 8 }}>
           Calories: {nutrition.nutrients.find(n => n.name === 'Calories')?.amount} kcal
         </div>
       )}

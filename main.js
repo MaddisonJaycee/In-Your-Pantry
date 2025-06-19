@@ -213,7 +213,7 @@ async function displayRecipe(recipeId) {
         if (data.sourceUrl) {
             goToRecipeBtnHtml = `
                 <a href="${data.sourceUrl}" target="_blank" rel="noopener noreferrer">
-                    <button class="add-to-shopping" style="margin-top:14px; background:linear-gradient(90deg,#0a369d 0%,#4472ca 100%);">Go to Recipe Website</button>
+                    <button class="add-to-shopping" style="margin-top:14px; background:linear-gradient(90deg,#ffe082 0%,#ff7043 100%); color:#3e2c1c;">Go to Recipe Website</button>
                 </a>
             `;
         }

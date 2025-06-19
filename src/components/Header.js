@@ -19,17 +19,24 @@ const Header = ({ handleShowShoppingList, handleSearch }) => {
     <div>
       <Button
         variant="contained"
-        color="primary"
+        style={{
+          ...circleButtonStyle,
+          marginRight: '16px',
+          background: 'linear-gradient(90deg, #ffe082 0%, #ff7043 100%)',
+          color: '#3e2c1c'
+        }}
         onClick={handleShowShoppingList}
-        style={{ ...circleButtonStyle, marginRight: '16px' }}
       >
         Shopping List
       </Button>
       <Button
         variant="contained"
-        color="secondary"
+        style={{
+          ...circleButtonStyle,
+          background: 'linear-gradient(90deg, #ff9800 0%, #8bc34a 100%)',
+          color: '#fffdfa'
+        }}
         onClick={handleSearch}
-        style={circleButtonStyle}
       >
         Search
       </Button>
