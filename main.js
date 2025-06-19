@@ -109,6 +109,8 @@ async function fetchRecipes(page = 1) {
                 missed = document.createElement('p');
                 missed.innerHTML = `<b>Calories:</b> ${item.nutrition && item.nutrition.nutrients ? (item.nutrition.nutrients.find(n => n.name === 'Calories')?.amount + ' kcal') : 'N/A'}`;
             }
+            used.style.color = '#ff9800';
+            missed.style.color = '#ff9800';
 
             // Container for info (to push button to bottom)
             const infoContainer = document.createElement('div');

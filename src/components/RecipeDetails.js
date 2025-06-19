@@ -25,12 +25,12 @@ function RecipeDetails({ ingredients, userPantry, onAddMissing, image, diets, nu
       )}
       {/* Show diets and calories */}
       {diets && diets.length > 0 && (
-        <div style={{ fontSize: '1rem', color: '#388e3c', marginBottom: 8 }}>
+        <div style={{ fontSize: '1rem', marginBottom: 8 }}>
           Diets: {diets.join(', ')}
         </div>
       )}
       {nutrition && nutrition.nutrients && (
-        <div style={{ fontSize: '1rem', color: '#81c784', marginBottom: 8 }}>
+        <div style={{ fontSize: '1rem', marginBottom: 8 }}>
           Calories: {nutrition.nutrients.find(n => n.name === 'Calories')?.amount} kcal
         </div>
       )}
@@ -45,9 +45,6 @@ function RecipeDetails({ ingredients, userPantry, onAddMissing, image, diets, nu
           marginTop: '24px',
           width: '100%',
           padding: '12px',
-          background: '#ffe082',
-          color: '#3e2c1c',
-          border: 'none',
           borderRadius: '8px',
           fontSize: '1rem',
           cursor: 'pointer'
