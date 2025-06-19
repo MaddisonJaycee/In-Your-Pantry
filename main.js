@@ -29,6 +29,23 @@ function renderIngredientChips() {
         chip.appendChild(removeBtn);
         chipsDiv.appendChild(chip);
     });
+
+    // Update the ingredient-list-display div under the Shopping List button
+    const displayDiv = document.getElementById('ingredient-list-display');
+    if (displayDiv) {
+        if (ingredientList.length === 0) {
+            displayDiv.innerHTML = '';
+        } else {
+            displayDiv.innerHTML = `
+                <div style="margin-top:6px; font-size:1.07rem;">
+                    <b>Ingredients added:</b>
+                    <span style="display:inline-block; margin-left:6px;">
+                        ${ingredientList.map(ing => `<span class="ingredient-chip" style="margin-right:6px;">${ing}</span>`).join('')}
+                    </span>
+                </div>
+            `;
+        }
+    }
 }
 
 function getIngredientQuery() {
