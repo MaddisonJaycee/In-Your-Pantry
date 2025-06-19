@@ -21,12 +21,12 @@ const RecipeList = ({ recipes }) => {
           <h3>{recipe.title}</h3>
           {/* Show diets and calories if present */}
           {recipe.diets && recipe.diets.length > 0 && (
-            <div style={{ fontSize: '0.95rem', color: '#ff9800', marginBottom: 4 }}>
+            <div style={{ fontSize: '0.95rem', color: '#388e3c', marginBottom: 4 }}>
               Diets: {recipe.diets.join(', ')}
             </div>
           )}
           {recipe.nutrition && recipe.nutrition.nutrients && (
-            <div style={{ fontSize: '0.95rem', color: '#8bc34a', marginBottom: 4 }}>
+            <div style={{ fontSize: '0.95rem', color: '#81c784', marginBottom: 4 }}>
               Calories: {recipe.nutrition.nutrients.find(n => n.name === 'Calories')?.amount} kcal
             </div>
           )}

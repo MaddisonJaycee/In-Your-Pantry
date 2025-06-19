@@ -1,4 +1,4 @@
-const SPOONACULAR_KEY = 'e2a8ab23886a406b8d1740eadb21af2b';
+const SPOONACULAR_KEY = '714d35d22379414698767ca0b6b0d48e';
 
 let currentPage = 1;
 let lastQuery = '';
@@ -213,7 +213,7 @@ async function displayRecipe(recipeId) {
         if (data.sourceUrl) {
             goToRecipeBtnHtml = `
                 <a href="${data.sourceUrl}" target="_blank" rel="noopener noreferrer">
-                    <button class="add-to-shopping" style="margin-top:14px; background:linear-gradient(90deg,#ffe082 0%,#ff7043 100%); color:#3e2c1c;">Go to Recipe Website</button>
+                    <button class="add-to-shopping" style="margin-top:14px; background:linear-gradient(90deg,#a5d6a7 0%,#388e3c 100%); color:#23472b;">Go to Recipe Website</button>
                 </a>
             `;
         }
@@ -397,6 +397,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // Use .circle-btn for both buttons
     document.getElementById('search-button').classList.add('circle-btn');
     document.getElementById('show-shopping-list').classList.add('circle-btn');
+
+    // Add reload random recipes button event
+    const reloadBtn = document.getElementById('reload-random-recipes');
+    if (reloadBtn) {
+        reloadBtn.addEventListener('click', () => {
+            showRandomRecipes();
+        });
+    }
 });
 
 // Shopping list functions

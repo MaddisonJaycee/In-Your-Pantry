@@ -35,7 +35,10 @@
     </div>
     <!-- Random Recipes Section (shown when no search) -->
     <div id="random-recipes-section" style="display:none;">
-        <h2 style="margin-left:32px; color:#ff9800; font-size:1.3rem; font-weight:800;">Discover Random Recipes</h2>
+        <div style="display:flex; align-items:center; margin-left:32px; margin-bottom:8px;">
+            <h2 style="margin-left:32px; color:#388e3c; font-size:1.3rem; font-weight:800;">Discover Random Recipes</h2>
+            <button id="reload-random-recipes" type="button" style="background:#8bc34a; color:#fffdfa; border:none; border-radius:999px; padding:8px 22px; font-weight:700; font-size:1rem; cursor:pointer; box-shadow:0 2px 8px 0 rgba(139,195,74,0.10); transition:background 0.18s,transform 0.1s;">Reload Recipes</button>
+        </div>
         <div id="random-recipes"></div>
     </div>
     <div id="results"></div>
@@ -53,7 +56,7 @@
     <!-- Shopping List Modal -->
     <div id="shopping-list-modal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; z-index:200; background:rgba(34,34,59,0.18); justify-content:center; align-items:center;">
         <div style="background:#fff; border-radius:18px; width:90vw; max-width:400px; box-shadow:0 8px 32px 0 rgba(58,12,163,0.18); overflow:hidden; display:flex; flex-direction:column;">
-            <div style="display:flex; justify-content:space-between; align-items:center; background:#3a0ca3; color:#fff; padding:12px 18px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; background:#8bc34a; color:#fff; padding:12px 18px;">
                 <span style="font-weight:bold;">Shopping List</span>
                 <button id="close-shopping-list" style="background:none; border:none; color:#fff; font-size:1.5rem; cursor:pointer;">&times;</button>
             </div>
