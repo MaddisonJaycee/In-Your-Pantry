@@ -361,6 +361,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    input.addEventListener('change', function(e) {
+        // If user selects from datalist, add as chip
+        const value = input.value.trim();
+        if (value && !ingredientList.includes(value.toLowerCase())) {
+            ingredientList.push(value.toLowerCase());
+            renderIngredientChips();
+            fetchRecipes(1);
+        }
+        input.value = '';
+        datalist.innerHTML = '';
+    });
+
     input.addEventListener('keydown', function(e) {
         if (e.key === 'Enter' || e.key === ',' || e.key === 'Tab') {
             e.preventDefault();
