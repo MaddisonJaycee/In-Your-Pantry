@@ -1,4 +1,4 @@
-const SPOONACULAR_KEY = '714d35d22379414698767ca0b6b0d48e';
+const SPOONACULAR_KEY = 'e2a8ab23886a406b8d1740eadb21af2b';
 
 let currentPage = 1;
 let lastQuery = '';

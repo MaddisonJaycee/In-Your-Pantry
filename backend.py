@@ -3,7 +3,7 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import urlparse, parse_qs
 import requests
 
-API_KEY = '714d35d22379414698767ca0b6b0d48e'
+API_KEY = 'e2a8ab23886a406b8d1740eadb21af2b'
 LOG_FILE = 'search_log.txt'
 FEEDBACK_FILE = 'feedback_log.txt'
 
