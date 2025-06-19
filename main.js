@@ -48,10 +48,13 @@ function getMaxCalories() {
 async function fetchRecipes(page = 1) {
     const resultsDiv = document.getElementById('results');
     const paginationDiv = document.getElementById('pagination');
+    // Hide random recipes section when searching
+    document.getElementById('random-recipes-section').style.display = 'none';
     resultsDiv.innerHTML = '';
     if (paginationDiv) paginationDiv.innerHTML = '';
     if (!ingredientList.length) {
-        resultsDiv.textContent = 'Please add one or more ingredients.';
+        resultsDiv.textContent = '';
+        showRandomRecipes();
         return;
     }
     lastQuery = getIngredientQuery();
@@ -264,6 +267,69 @@ async function fetchIngredientSuggestions(query) {
     }
 }
 
+// Show random recipes if no ingredients are entered
+async function showRandomRecipes() {
+    const section = document.getElementById('random-recipes-section');
+    const container = document.getElementById('random-recipes');
+    section.style.display = 'block';
+    container.innerHTML = '';
+    try {
+        // Spoonacular allows up to 10 random recipes per call
+        const url = `https://api.spoonacular.com/recipes/random?apiKey=${SPOONACULAR_KEY}&number=4`;
+        const res = await fetch(url);
+        const data = await res.json();
+        if (!data.recipes || data.recipes.length === 0) {
+            container.textContent = 'No random recipes available.';
+            return;
+        }
+        data.recipes.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'recipe-item';
+            const img = document.createElement('img');
+            img.src = item.image;
+            img.alt = item.title;
+            const title = document.createElement('h3');
+            title.textContent = item.title;
+
+            // Diets and calories (if available)
+            const diets = document.createElement('p');
+            diets.innerHTML = `<b>Diets:</b> ${(item.diets && item.diets.length) ? item.diets.join(', ') : 'None'}`;
+            const calories = document.createElement('p');
+            calories.innerHTML = `<b>Calories:</b> ${
+                item.nutrition && item.nutrition.nutrients
+                ? (item.nutrition.nutrients.find(n => n.name === 'Calories')?.amount + ' kcal')
+                : 'N/A'
+            }`;
+
+            // Container for info
+            const infoContainer = document.createElement('div');
+            infoContainer.style.display = 'flex';
+            infoContainer.style.flexDirection = 'column';
+            infoContainer.style.flexGrow = '1';
+            infoContainer.appendChild(title);
+            infoContainer.appendChild(diets);
+            infoContainer.appendChild(calories);
+
+            // See Details button
+            const btn = document.createElement('button');
+            btn.className = 'view-details-btn';
+            btn.textContent = 'View Details';
+            btn.onclick = async (e) => {
+                e.preventDefault();
+                await displayRecipe(item.id);
+            };
+
+            card.appendChild(img);
+            card.appendChild(infoContainer);
+            card.appendChild(btn);
+            container.appendChild(card);
+        });
+    } catch (err) {
+        container.textContent = 'Error loading random recipes.';
+        console.error(err);
+    }
+}
+
 // Attach new function to button
 window.searchRecipes = () => fetchRecipes(1);
 window.closeRecipeDetails = closeRecipeDetails;
@@ -273,7 +339,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const input = document.getElementById('ingredient-input');
     const datalist = document.getElementById('ingredient-suggestions');
     renderIngredientChips();
-
+    // Show random recipes on load
+    if (!ingredientList.length) {
+        showRandomRecipes();
+    }
     // Listen for input events to fetch suggestions
     input.addEventListener('input', async function(e) {
         const value = input.value.trim();

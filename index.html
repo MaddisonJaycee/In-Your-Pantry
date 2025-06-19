@@ -29,9 +29,14 @@
             <option value="low fodmap">Low FODMAP</option>
         </select>
         <!-- Calories input -->
-        <input type="number" id="max-calories" placeholder="Max Calories" min="0" style="width:110px;">
+        <input type="number" id="max-calories" placeholder="Max Calories" min="0" style="width:125px;">
         <button id="search-button" onclick="searchRecipes()">Search</button>
         <button id="show-shopping-list" type="button">Shopping List</button>
+    </div>
+    <!-- Random Recipes Section (shown when no search) -->
+    <div id="random-recipes-section" style="display:none;">
+        <h2 style="margin-left:32px; color:#3a86ff; font-size:1.3rem; font-weight:800;">Discover Random Recipes</h2>
+        <div id="random-recipes"></div>
     </div>
     <div id="results"></div>
     <div id="pagination"></div>
