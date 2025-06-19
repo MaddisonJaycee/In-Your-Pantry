@@ -1,36 +1,26 @@
 import React from 'react';
 
-// Assume props: ingredients (array), userPantry (array), onAddMissing (function)
-function RecipeDetails({ ingredients, userPantry, onAddMissing, image, diets, nutrition, ...props }) {
-  // Find missing ingredients
+function RecipeDetails({ ingredients, userPantry, onAddMissing, image, diets, nutrition }) {
   const missingIngredients = ingredients.filter(
     (ingredient) => !userPantry.includes(ingredient)
   );
 
   return (
     <div>
-      {/* ...existing code... */}
       {image && (
         <img
           src={image}
           alt="Recipe"
-          style={{
-            width: '100%',
-            height: '220px',
-            objectFit: 'cover',
-            borderRadius: '12px',
-            marginBottom: '16px'
-          }}
+          className="recipe-detail-image"
         />
       )}
-      {/* Show diets and calories */}
       {diets && diets.length > 0 && (
-        <div style={{ fontSize: '1rem', marginBottom: 8 }}>
+        <div className="recipe-detail-diets">
           Diets: {diets.join(', ')}
         </div>
       )}
       {nutrition && nutrition.nutrients && (
-        <div style={{ fontSize: '1rem', marginBottom: 8 }}>
+        <div className="recipe-detail-calories">
           Calories: {nutrition.nutrients.find(n => n.name === 'Calories')?.amount} kcal
         </div>
       )}
@@ -41,14 +31,8 @@ function RecipeDetails({ ingredients, userPantry, onAddMissing, image, diets, nu
         ))}
       </ul>
       <button
-        style={{
-          marginTop: '24px',
-          width: '100%',
-          padding: '12px',
-          borderRadius: '8px',
-          fontSize: '1rem',
-          cursor: 'pointer'
-        }}
+        className="add-to-shopping"
+        style={{ marginTop: 24, width: '100%' }}
         onClick={() => onAddMissing(missingIngredients)}
         disabled={missingIngredients.length === 0}
       >

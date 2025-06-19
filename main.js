@@ -5,47 +5,31 @@ let lastQuery = '';
 let lastTotalResults = null;
 const RECIPES_PER_PAGE = 16;
 
-// Ingredient chips state
 let ingredientList = [];
-
-// Shopping list state (persisted in localStorage)
 let shoppingList = JSON.parse(localStorage.getItem('shoppingList') || '[]');
 
 function renderIngredientChips() {
-    const chipsDiv = document.getElementById('ingredient-chips');
-    chipsDiv.innerHTML = '';
-    ingredientList.forEach((ingredient, idx) => {
-        const chip = document.createElement('span');
-        chip.className = 'ingredient-chip';
-        chip.textContent = ingredient;
-        const removeBtn = document.createElement('button');
-        removeBtn.className = 'remove-chip';
-        removeBtn.innerHTML = '&times;';
-        removeBtn.onclick = () => {
-            ingredientList.splice(idx, 1);
-            renderIngredientChips();
-            // Do NOT fetch recipes here (only on add)
-        };
-        chip.appendChild(removeBtn);
-        chipsDiv.appendChild(chip);
-    });
-
-    // Update the ingredient-list-display div under the Shopping List button
+    // Update ingredient-list-display to show chips with remove buttons
     const displayDiv = document.getElementById('ingredient-list-display');
     if (displayDiv) {
-        if (ingredientList.length === 0) {
-            displayDiv.innerHTML = '';
+        if (ingredientList.length) {
+            displayDiv.innerHTML = `<b>Ingredients added:</b>
+                <ul class="ingredient-list-ul">
+                    ${ingredientList.map((ing, idx) =>
+                        `<li class="ingredient-chip">${ing}<button class="remove-chip" onclick="removeIngredient(${idx})">&times;</button></li>`
+                    ).join('')}
+                </ul>`;
         } else {
-            displayDiv.innerHTML = `
-                <div style="margin-top:6px; font-size:1.07rem;">
-                    <b>Ingredients added:</b>
-                    <span style="display:inline-block; margin-left:6px;">
-                        ${ingredientList.map(ing => `<span class="ingredient-chip" style="margin-right:6px;">${ing}</span>`).join('')}
-                    </span>
-                </div>
-            `;
+            displayDiv.innerHTML = '';
         }
     }
+}
+
+// Add this function to handle ingredient removal
+window.removeIngredient = function(idx) {
+    ingredientList.splice(idx, 1);
+    renderIngredientChips();
+    fetchRecipes(1);
 }
 
 function getIngredientQuery() {
@@ -65,7 +49,6 @@ function getMaxCalories() {
 async function fetchRecipes(page = 1) {
     const resultsDiv = document.getElementById('results');
     const paginationDiv = document.getElementById('pagination');
-    // Hide random recipes section when searching
     document.getElementById('random-recipes-section').style.display = 'none';
     resultsDiv.innerHTML = '';
     if (paginationDiv) paginationDiv.innerHTML = '';
@@ -80,10 +63,8 @@ async function fetchRecipes(page = 1) {
         const offset = (page - 1) * RECIPES_PER_PAGE;
         let url = `https://api.spoonacular.com/recipes/findByIngredients?apiKey=${SPOONACULAR_KEY}&ingredients=${encodeURIComponent(lastQuery)}&number=${RECIPES_PER_PAGE}&offset=${offset}&ranking=1&ignorePantry=true`;
 
-        // Add diet and calorie filters
         const diet = getDietQuery();
         const maxCalories = getMaxCalories();
-        // For diet, we need to use /complexSearch endpoint, so only use if filters are set
         if (diet || maxCalories) {
             url = `https://api.spoonacular.com/recipes/complexSearch?apiKey=${SPOONACULAR_KEY}&includeIngredients=${encodeURIComponent(lastQuery)}&number=${RECIPES_PER_PAGE}&offset=${offset}`;
             if (diet) url += `&diet=${encodeURIComponent(diet)}`;
@@ -94,12 +75,9 @@ async function fetchRecipes(page = 1) {
         const res = await fetch(url);
         const data = await res.json();
         let recipes = data;
-        // For complexSearch, recipes are in data.results
         if (diet || maxCalories) {
             recipes = data.results || [];
         }
-        // Spoonacular does not return totalResults for this endpoint, so we estimate
-        // If less than requested, it's the last page
         if (!recipes || recipes.length === 0) {
             resultsDiv.textContent = 'No recipes found.';
             return;
@@ -113,7 +91,6 @@ async function fetchRecipes(page = 1) {
             const title = document.createElement('h3');
             title.textContent = item.title;
 
-            // Used/missed ingredients for findByIngredients, otherwise show diets/calories
             let used, missed;
             if (item.usedIngredients && item.missedIngredients) {
                 used = document.createElement('p');
@@ -129,7 +106,6 @@ async function fetchRecipes(page = 1) {
             used.style.color = '#ff9800';
             missed.style.color = '#ff9800';
 
-            // Container for info (to push button to bottom)
             const infoContainer = document.createElement('div');
             infoContainer.style.display = 'flex';
             infoContainer.style.flexDirection = 'column';
@@ -138,7 +114,6 @@ async function fetchRecipes(page = 1) {
             infoContainer.appendChild(used);
             infoContainer.appendChild(missed);
 
-            // See Details button
             const btn = document.createElement('button');
             btn.className = 'view-details-btn';
             btn.textContent = 'View Details';
@@ -153,7 +128,6 @@ async function fetchRecipes(page = 1) {
             resultsDiv.appendChild(card);
         });
 
-        // Pagination arrows
         let pagination = document.getElementById('pagination');
         if (!pagination) {
             pagination = document.createElement('div');
@@ -162,7 +136,6 @@ async function fetchRecipes(page = 1) {
         }
         pagination.innerHTML = '';
 
-        // Previous arrow
         const prevBtn = document.createElement('button');
         prevBtn.className = 'page-arrow';
         prevBtn.innerHTML = '<i class="fas fa-chevron-left"></i>';
@@ -170,17 +143,14 @@ async function fetchRecipes(page = 1) {
         prevBtn.onclick = () => fetchRecipes(page - 1);
         pagination.appendChild(prevBtn);
 
-        // Page info
         const pageInfo = document.createElement('span');
         pageInfo.className = 'page-info';
         pageInfo.textContent = `Page ${page}`;
         pagination.appendChild(pageInfo);
 
-        // Next arrow
         const nextBtn = document.createElement('button');
         nextBtn.className = 'page-arrow';
         nextBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
-        // If less than RECIPES_PER_PAGE, it's the last page
         nextBtn.disabled = recipes.length < RECIPES_PER_PAGE;
         nextBtn.onclick = () => fetchRecipes(page + 1);
         pagination.appendChild(nextBtn);
@@ -204,20 +174,16 @@ async function displayRecipe(recipeId) {
         const url = `https://api.spoonacular.com/recipes/${recipeId}/information?apiKey=${SPOONACULAR_KEY}`;
         const res = await fetch(url);
         const data = await res.json();
-        // Format ingredients as a list
         const ingredientsList = data.extendedIngredients.map(i => `<li>${i.original}</li>`).join('');
-        // Format instructions as HTML
         let instructions = data.instructions || '';
         if (!instructions && data.analyzedInstructions && data.analyzedInstructions.length > 0) {
             instructions = '<ol>' + data.analyzedInstructions[0].steps.map(s => `<li>${s.step}</li>`).join('') + '</ol>';
         }
         if (!instructions) instructions = 'No instructions provided.';
 
-        // Find missing ingredients (not in ingredientList)
         const missingIngredients = data.extendedIngredients
             .filter(i => !ingredientList.includes(i.name.toLowerCase()));
 
-        // Only show one ingredient list, and put the add button below it
         let addMissingBtnHtml = '';
         if (missingIngredients.length > 0) {
             addMissingBtnHtml = `
@@ -227,7 +193,6 @@ async function displayRecipe(recipeId) {
             addMissingBtnHtml = `<p><b>All ingredients are in your pantry!</b></p>`;
         }
 
-        // Add "Go to Recipe Website" button if sourceUrl exists
         let goToRecipeBtnHtml = '';
         if (data.sourceUrl) {
             goToRecipeBtnHtml = `
@@ -248,10 +213,8 @@ async function displayRecipe(recipeId) {
             <div>${instructions}</div>
         `;
         details.style.display = 'flex';
-        // Prevent background scroll when modal is open
         document.body.style.overflow = 'hidden';
 
-        // Attach event listener to "Add All Missing" button
         const addAllBtn = document.getElementById('add-all-missing');
         if (addAllBtn) {
             addAllBtn.addEventListener('click', function() {
@@ -269,11 +232,9 @@ async function displayRecipe(recipeId) {
 
 function closeRecipeDetails() {
     document.getElementById('recipe-details').style.display = 'none';
-    // Restore background scroll when modal is closed
     document.body.style.overflow = '';
 }
 
-// Add this function to fetch ingredient suggestions from Spoonacular
 async function fetchIngredientSuggestions(query) {
     if (!query) return [];
     try {
@@ -286,14 +247,12 @@ async function fetchIngredientSuggestions(query) {
     }
 }
 
-// Show random recipes if no ingredients are entered
 async function showRandomRecipes() {
     const section = document.getElementById('random-recipes-section');
     const container = document.getElementById('random-recipes');
     section.style.display = 'block';
     container.innerHTML = '';
     try {
-        // Spoonacular allows up to 10 random recipes per call
         const url = `https://api.spoonacular.com/recipes/random?apiKey=${SPOONACULAR_KEY}&number=4`;
         const res = await fetch(url);
         const data = await res.json();
@@ -310,7 +269,6 @@ async function showRandomRecipes() {
             const title = document.createElement('h3');
             title.textContent = item.title;
 
-            // Diets and calories (if available)
             const diets = document.createElement('p');
             diets.innerHTML = `<b>Diets:</b> ${(item.diets && item.diets.length) ? item.diets.join(', ') : 'None'}`;
             const calories = document.createElement('p');
@@ -320,7 +278,6 @@ async function showRandomRecipes() {
                 : 'N/A'
             }`;
 
-            // Container for info
             const infoContainer = document.createElement('div');
             infoContainer.style.display = 'flex';
             infoContainer.style.flexDirection = 'column';
@@ -329,7 +286,6 @@ async function showRandomRecipes() {
             infoContainer.appendChild(diets);
             infoContainer.appendChild(calories);
 
-            // See Details button
             const btn = document.createElement('button');
             btn.className = 'view-details-btn';
             btn.textContent = 'View Details';
@@ -349,21 +305,17 @@ async function showRandomRecipes() {
     }
 }
 
-// Attach new function to button
 window.searchRecipes = () => fetchRecipes(1);
 window.closeRecipeDetails = closeRecipeDetails;
 
-// Ingredient input logic
 document.addEventListener('DOMContentLoaded', () => {
     const input = document.getElementById('ingredient-input');
     const datalist = document.getElementById('ingredient-suggestions');
     renderIngredientChips();
-    // Show random recipes on load
     if (!ingredientList.length) {
         showRandomRecipes();
     }
-    // Listen for input events to fetch suggestions
-    input.addEventListener('input', async function(e) {
+    input.addEventListener('input', async function() {
         const value = input.value.trim();
         if (value.length > 0) {
             const suggestions = await fetchIngredientSuggestions(value);
@@ -378,8 +330,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    input.addEventListener('change', function(e) {
-        // If user selects from datalist, add as chip
+    input.addEventListener('change', function() {
         const value = input.value.trim();
         if (value && !ingredientList.includes(value.toLowerCase())) {
             ingredientList.push(value.toLowerCase());
@@ -397,39 +348,33 @@ document.addEventListener('DOMContentLoaded', () => {
             if (value && !ingredientList.includes(value.toLowerCase())) {
                 ingredientList.push(value.toLowerCase());
                 renderIngredientChips();
-                fetchRecipes(1); // Fetch recipes on add
+                fetchRecipes(1);
             }
             input.value = '';
             datalist.innerHTML = '';
         } else if (e.key === 'Backspace' && input.value === '') {
-            // Remove last chip if input is empty and backspace is pressed
             ingredientList.pop();
             renderIngredientChips();
-            // Do NOT fetch recipes here (only on add)
         }
     });
 
     input.addEventListener('blur', function() {
-        // Add chip on blur if input has value
         const value = input.value.trim();
         if (value && !ingredientList.includes(value.toLowerCase())) {
             ingredientList.push(value.toLowerCase());
             renderIngredientChips();
-            fetchRecipes(1); // Fetch recipes on add
+            fetchRecipes(1);
         }
         input.value = '';
         datalist.innerHTML = '';
     });
 
-    // Shopping list modal events
     document.getElementById('show-shopping-list').addEventListener('click', showShoppingListModal);
     document.getElementById('close-shopping-list').addEventListener('click', closeShoppingListModal);
 
-    // Use .circle-btn for both buttons
     document.getElementById('search-button').classList.add('circle-btn');
     document.getElementById('show-shopping-list').classList.add('circle-btn');
 
-    // Add reload random recipes button event
     const reloadBtn = document.getElementById('reload-random-recipes');
     if (reloadBtn) {
         reloadBtn.addEventListener('click', () => {
@@ -438,7 +383,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// Shopping list functions
 function addToShoppingList(ingredient) {
     if (!shoppingList.includes(ingredient)) {
         shoppingList.push(ingredient);
@@ -448,18 +392,17 @@ function addToShoppingList(ingredient) {
 }
 
 function renderShoppingList() {
-    const modal = document.getElementById('shopping-list-modal');
     const content = document.getElementById('shopping-list-content');
     if (!content) return;
     if (shoppingList.length === 0) {
         content.innerHTML = '<p>Your shopping list is empty.</p>';
     } else {
         content.innerHTML = `
-            <ul style="padding-left:0; list-style:none; margin:0;">
+            <ul>
                 ${shoppingList.map((item, idx) =>
-                    `<li style="display:flex; align-items:center; justify-content:space-between; padding:6px 0; border-bottom:1px solid #f0f0f0;">
+                    `<li>
                         <span>${item}</span>
-                        <button class="remove-chip" style="font-size:1.1rem; margin-left:18px;" onclick="removeFromShoppingList(${idx})">&times;</button>
+                        <button class="remove-chip" onclick="removeFromShoppingList(${idx})">&times;</button>
                     </li>`
                 ).join('')}
             </ul>
