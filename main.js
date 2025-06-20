@@ -9,7 +9,6 @@ let ingredientList = [];
 let shoppingList = JSON.parse(localStorage.getItem('shoppingList') || '[]');
 
 function renderIngredientChips() {
-    // Update ingredient-list-display to show chips with remove buttons
     const displayDiv = document.getElementById('ingredient-list-display');
     if (displayDiv) {
         if (ingredientList.length) {
@@ -25,7 +24,6 @@ function renderIngredientChips() {
     }
 }
 
-// Add this function to handle ingredient removal
 window.removeIngredient = function(idx) {
     ingredientList.splice(idx, 1);
     renderIngredientChips();

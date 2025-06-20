@@ -16,7 +16,6 @@
         <div id="ingredient-chips"></div>
         <input type="text" id="ingredient-input" placeholder="Add ingredient..." list="ingredient-suggestions">
         <datalist id="ingredient-suggestions"></datalist>
-        <!-- Dietary preferences dropdown -->
         <select id="diet-select">
             <option value="">Any Diet</option>
             <option value="vegetarian">Vegetarian</option>
@@ -28,13 +27,11 @@
             <option value="dairy free">Dairy Free</option>
             <option value="low fodmap">Low FODMAP</option>
         </select>
-        <!-- Calories input -->
         <input type="number" id="max-calories" placeholder="Max Calories" min="0" style="width:125px;">
         <button id="search-button" onclick="searchRecipes()">Search</button>
         <button id="show-shopping-list" type="button">Shopping List</button>
     </div>
     <div id="ingredient-list-display" style="width:100%; margin-top:10px;"></div>
-    <!-- Random Recipes Section (shown when no search) -->
     <div id="random-recipes-section" style="display:none;">
         <div>
             <h2>Discover Random Recipes</h2>
@@ -54,7 +51,6 @@
             <div id="recipe-content"></div>
         </div>
     </div>
-    <!-- Shopping List Modal -->
     <div id="shopping-list-modal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; z-index:200; background:rgba(34,34,59,0.18); justify-content:center; align-items:center;">
         <div style="background:#fff; border-radius:18px; width:90vw; max-width:400px; box-shadow:0 8px 32px 0 rgba(58,12,163,0.18); overflow:hidden; display:flex; flex-direction:column;">
             <div style="display:flex; justify-content:space-between; align-items:center; background:#8bc34a; color:#fff; padding:12px 18px;">

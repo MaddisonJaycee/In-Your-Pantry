@@ -1,4 +1,3 @@
-/* --- Base Styles --- */
 body {
   display: flex;
   flex-direction: column;
@@ -19,7 +18,6 @@ h1 {
   text-align: center;
 }
 
-/* --- Search Form --- */
 #search-form {
   display: flex;
   flex-wrap: wrap;
@@ -62,7 +60,6 @@ h1 {
   min-width: 110px;
 }
 
-/* --- Pill Buttons --- */
 .circle-btn {
   border-radius: 999px;
   width: 120px;
@@ -111,7 +108,6 @@ h1 {
   color: #fff;
 }
 
-/* --- Results --- */
 #results,
 #random-recipes {
   display: flex;
@@ -138,7 +134,6 @@ h1 {
   width: 260px;
   min-width: 240px;
   max-width: 320px;
-  /* Remove fixed height, allow min-height and max-height for flexibility */
   min-height: 420px;
   max-height: 700px;
   height: auto;
@@ -161,7 +156,6 @@ h1 {
   display: flex;
   flex-direction: column;
   align-items: center;
-  /* Allow content to grow and scroll if needed */
   max-height: 420px;
 }
 
@@ -214,7 +208,6 @@ h1 {
   flex-shrink: 0;
 }
 
-/* --- Pagination --- */
 #pagination {
   display: flex;
   justify-content: center;
@@ -249,7 +242,6 @@ h1 {
   letter-spacing: 0.2px;
 }
 
-/* --- Chips --- */
 #ingredient-chips {
   display: none !important;
   justify-content: center;
@@ -297,7 +289,6 @@ h1 {
   transform: scale(1.2);
 }
 
-/* --- Ingredient Input --- */
 #ingredient-input {
   width: 18vw;
   min-width: 120px;
@@ -319,7 +310,6 @@ h1 {
   opacity: 0.8;
 }
 
-/* --- Shopping List Modal --- */
 #shopping-list-modal {
   display: none;
   flex-direction: column;
@@ -373,7 +363,6 @@ h1 {
   font-size: 1.1rem;
 }
 
-/* --- Modal & Accessibility --- */
 #recipe-details {
   display: none;
   flex-direction: column;
@@ -448,7 +437,6 @@ h1 {
   margin: 10px 0 18px 0;
 }
 
-/* --- Utility --- */
 .add-to-shopping {
   margin-left: 10px;
   padding: 4px 12px;
@@ -474,7 +462,6 @@ button:focus, input:focus {
   outline-offset: 2px;
 }
 
-/* --- Random Recipes Section --- */
 #random-recipes-section > div {
   display: flex;
   align-items: center;
@@ -509,7 +496,6 @@ button:focus, input:focus {
   color: #fff;
 }
 
-/* --- Ingredients Added Display --- */
 #ingredient-list-display {
   display: block;
   width: 90vw;
@@ -535,7 +521,6 @@ button:focus, input:focus {
   text-align: center;
 }
 
-/* --- Responsive improvements --- */
 @media (max-width: 700px) {
   #search-form, #results, #random-recipes {
     flex-direction: column;
@@ -553,7 +538,6 @@ button:focus, input:focus {
     min-height: 0;
     max-height: none;
     text-align: center;
-    /* Remove fixed min/max height for mobile */
   }
   .recipe-item img {
     height: 38vw;

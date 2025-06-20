@@ -20,7 +20,6 @@ const RecipeList = ({ recipes }) => {
               />
             )}
             <h3>{recipe.title}</h3>
-            {/* Show diets and calories if present */}
             {recipe.diets && recipe.diets.length > 0 && (
               <div style={{ fontSize: '0.95rem', marginBottom: 4 }}>
                 Diets: {recipe.diets.join(', ')}
@@ -31,7 +30,6 @@ const RecipeList = ({ recipes }) => {
                 Calories: {recipe.nutrition.nutrients.find(n => n.name === 'Calories')?.amount} kcal
               </div>
             )}
-            {/* ...existing code... */}
           </div>
           <button className="view-details-btn">
             View Details
