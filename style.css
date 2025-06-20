@@ -135,12 +135,13 @@ h1 {
   flex-direction: column;
   align-items: center;
   padding: 18px 12px 14px 12px;
-  width: 240px;
+  width: 260px;
   min-width: 240px;
-  max-width: 240px;
-  height: 370px;
-  min-height: 370px;
-  max-height: 370px;
+  max-width: 320px;
+  /* Remove fixed height, allow min-height and max-height for flexibility */
+  min-height: 420px;
+  max-height: 700px;
+  height: auto;
   box-sizing: border-box;
   background: #fff;
   border: 1.5px solid #bbb;
@@ -150,23 +151,50 @@ h1 {
   justify-content: flex-start;
   border-radius: 16px;
   transition: box-shadow 0.18s, border 0.18s;
+  overflow: hidden;
 }
-.recipe-item:hover {
-  box-shadow: 0 8px 32px 0 rgba(0,0,0,0.18);
-  border: 1.5px solid #222;
+
+.recipe-item-content {
+  flex: 1 1 auto;
+  width: 100%;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* Allow content to grow and scroll if needed */
+  max-height: 420px;
 }
+
 .recipe-item img {
   width: 100%;
-  height: 130px;
+  height: 150px;
   min-height: 130px;
-  max-height: 130px;
+  max-height: 180px;
   object-fit: cover;
   border-radius: 10px;
   margin-bottom: 14px;
   display: block;
   max-width: 100%;
   box-shadow: 0 2px 10px 0 rgba(0,0,0,0.10);
+  flex-shrink: 0;
 }
+
+.recipe-item h3 {
+  font-size: 1.08rem;
+  font-weight: 700;
+  margin: 0 0 6px 0;
+  text-align: center;
+  word-break: break-word;
+}
+
+.recipe-item .recipe-info {
+  font-size: 0.97rem;
+  margin-bottom: 4px;
+  color: #444;
+  text-align: center;
+  word-break: break-word;
+}
+
 .recipe-item .view-details-btn {
   margin-top: auto;
   width: 92%;
@@ -183,10 +211,7 @@ h1 {
   letter-spacing: 0.2px;
   display: block;
   text-align: center;
-}
-.recipe-item .view-details-btn:hover {
-  background: #222;
-  color: #fff;
+  flex-shrink: 0;
 }
 
 /* --- Pagination --- */
@@ -528,11 +553,12 @@ button:focus, input:focus {
     min-height: 0;
     max-height: none;
     text-align: center;
+    /* Remove fixed min/max height for mobile */
   }
   .recipe-item img {
     height: 38vw;
     min-height: 90px;
-    max-height: 180px;
+    max-height: 220px;
   }
   #ingredient-input {
     width: 90vw;
