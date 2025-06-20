@@ -44,11 +44,13 @@ function getMaxCalories() {
     return calInput && calInput.value ? parseInt(calInput.value, 10) : null;
 }
 
-async function fetchRecipes(page = 1) {
+let allLoaded = false; // Track if all recipes are loaded
+
+async function fetchRecipes(page = 1, append = false) {
     const resultsDiv = document.getElementById('results');
     const paginationDiv = document.getElementById('pagination');
     document.getElementById('random-recipes-section').style.display = 'none';
-    resultsDiv.innerHTML = '';
+    if (!append) resultsDiv.innerHTML = '';
     if (paginationDiv) paginationDiv.innerHTML = '';
     if (!ingredientList.length) {
         resultsDiv.textContent = '';
@@ -59,50 +61,62 @@ async function fetchRecipes(page = 1) {
     currentPage = page;
     try {
         const offset = (page - 1) * RECIPES_PER_PAGE;
-        let url = `https://api.spoonacular.com/recipes/findByIngredients?apiKey=${SPOONACULAR_KEY}&ingredients=${encodeURIComponent(lastQuery)}&number=${RECIPES_PER_PAGE}&offset=${offset}&ranking=1&ignorePantry=true`;
-
         const diet = getDietQuery();
         const maxCalories = getMaxCalories();
-        if (diet || maxCalories) {
-            url = `https://api.spoonacular.com/recipes/complexSearch?apiKey=${SPOONACULAR_KEY}&includeIngredients=${encodeURIComponent(lastQuery)}&number=${RECIPES_PER_PAGE}&offset=${offset}`;
-            if (diet) url += `&diet=${encodeURIComponent(diet)}`;
-            if (maxCalories) url += `&maxCalories=${maxCalories}`;
-            url += `&addRecipeInformation=true`;
-        }
+
+        // Always use complexSearch for pagination support
+        let url = `https://api.spoonacular.com/recipes/complexSearch?apiKey=${SPOONACULAR_KEY}&includeIngredients=${encodeURIComponent(lastQuery)}&number=${RECIPES_PER_PAGE}&offset=${offset}&addRecipeInformation=true`;
+        if (diet) url += `&diet=${encodeURIComponent(diet)}`;
+        if (maxCalories) url += `&maxCalories=${maxCalories}`;
 
         const res = await fetch(url);
         const data = await res.json();
-        let recipes = data;
-        if (diet || maxCalories) {
-            recipes = data.results || [];
-        }
+        let recipes = data.results || [];
         if (!recipes || recipes.length === 0) {
-            resultsDiv.textContent = 'No recipes found.';
+            if (!append) resultsDiv.textContent = 'No recipes found.';
+            allLoaded = true;
             return;
         }
+        // If appending, don't clear previous results
         recipes.forEach(item => {
             const card = document.createElement('div');
             card.className = 'recipe-item';
+            card.style.height = '420px'; // enforce fixed height
             const img = document.createElement('img');
             img.src = item.image;
             img.alt = item.title;
             const title = document.createElement('h3');
             title.textContent = item.title;
+            // Remove whiteSpace: nowrap, allow wrapping
+            title.style.wordBreak = 'break-word';
+            title.style.overflow = 'hidden';
+            title.style.textOverflow = 'ellipsis';
+            title.style.maxWidth = '95%';
 
             let used, missed;
             if (item.usedIngredients && item.missedIngredients) {
                 used = document.createElement('p');
+                used.className = 'recipe-info';
                 used.innerHTML = `<b>Used:</b> ${item.usedIngredients.map(i => i.name).join(', ') || 'None'}`;
                 missed = document.createElement('p');
+                missed.className = 'recipe-info';
                 missed.innerHTML = `<b>Missing:</b> ${item.missedIngredients.map(i => i.name).join(', ') || 'None'}`;
             } else {
                 used = document.createElement('p');
+                used.className = 'recipe-info';
                 used.innerHTML = `<b>Diets:</b> ${(item.diets && item.diets.length) ? item.diets.join(', ') : 'None'}`;
                 missed = document.createElement('p');
+                missed.className = 'recipe-info';
                 missed.innerHTML = `<b>Calories:</b> ${item.nutrition && item.nutrition.nutrients ? (item.nutrition.nutrients.find(n => n.name === 'Calories')?.amount + ' kcal') : 'N/A'}`;
             }
-            used.style.color = '#ff9800';
-            missed.style.color = '#ff9800';
+            // Remove whiteSpace: nowrap, allow wrapping
+            [used, missed].forEach(el => {
+                el.style.wordBreak = 'break-word';
+                el.style.overflow = 'hidden';
+                el.style.textOverflow = 'ellipsis';
+                el.style.maxWidth = '95%';
+                el.style.color = '#ff9800';
+            });
 
             const infoContainer = document.createElement('div');
             infoContainer.style.display = 'flex';
@@ -138,7 +152,10 @@ async function fetchRecipes(page = 1) {
         prevBtn.className = 'page-arrow';
         prevBtn.innerHTML = '<i class="fas fa-chevron-left"></i>';
         prevBtn.disabled = page === 1;
-        prevBtn.onclick = () => fetchRecipes(page - 1);
+        prevBtn.onclick = () => {
+            allLoaded = false;
+            fetchRecipes(page - 1);
+        };
         pagination.appendChild(prevBtn);
 
         const pageInfo = document.createElement('span');
@@ -149,9 +166,23 @@ async function fetchRecipes(page = 1) {
         const nextBtn = document.createElement('button');
         nextBtn.className = 'page-arrow';
         nextBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
-        nextBtn.disabled = recipes.length < RECIPES_PER_PAGE;
-        nextBtn.onclick = () => fetchRecipes(page + 1);
+        nextBtn.disabled = recipes.length < RECIPES_PER_PAGE || allLoaded;
+        nextBtn.onclick = () => {
+            fetchRecipes(page + 1, false);
+        };
         pagination.appendChild(nextBtn);
+
+        // Infinite scroll/load more style: if you want to append, use this:
+        // nextBtn.onclick = () => {
+        //     fetchRecipes(page + 1, true);
+        //     currentPage = page + 1;
+        // };
+
+        if (recipes.length < RECIPES_PER_PAGE) {
+            allLoaded = true;
+        } else {
+            allLoaded = false;
+        }
 
     } catch (err) {
         resultsDiv.textContent = 'Error loading recipes.';
