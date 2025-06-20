@@ -454,6 +454,7 @@ h1 {
   transition: background 0.15s, color 0.15s, transform 0.1s;
   box-shadow: 0 1px 6px 0 rgba(0,0,0,0.10);
   letter-spacing: 0.2px;
+  margin-top: 8px;
 }
 .add-to-shopping:disabled {
   background: #e0e0e0;

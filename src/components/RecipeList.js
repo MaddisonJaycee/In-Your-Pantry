@@ -31,9 +31,6 @@ const RecipeList = ({ recipes }) => {
               </div>
             )}
           </div>
-          <button className="view-details-btn">
-            View Details
-          </button>
         </div>
       ))}
     </div>

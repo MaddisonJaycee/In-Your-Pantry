@@ -14,7 +14,6 @@ class RecipeFinder:
         self.api_key = api_key
 
     def find_by_ingredients(self, ingredients, number=16, offset=0, diet=None, max_calories=None):
-        # Use complexSearch if diet or calories are set
         if diet or max_calories:
             url = (
                 f"https://api.spoonacular.com/recipes/complexSearch"
@@ -109,7 +108,6 @@ class RequestHandler(BaseHTTPRequestHandler):
             content_length = int(self.headers['Content-Length'])
             post_data = self.rfile.read(content_length)
             ingredients = json.loads(post_data)
-            # Add only new ingredients
             for item in ingredients:
                 if item not in shopping_list:
                     shopping_list.append(item)
@@ -127,5 +125,7 @@ def run(server_class=HTTPServer, handler_class=RequestHandler, port=5000):
     print(f'Serving backend on port {port}')
     httpd.serve_forever()
 
+if __name__ == '__main__':
+    run()
 if __name__ == '__main__':
     run()

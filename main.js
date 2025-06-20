@@ -1,4 +1,4 @@
-const SPOONACULAR_KEY = 'e2a8ab23886a406b8d1740eadb21af2b';
+const SPOONACULAR_KEY = '714d35d22379414698767ca0b6b0d48e';
 
 let currentPage = 1;
 let lastQuery = '';
@@ -7,6 +7,7 @@ const RECIPES_PER_PAGE = 16;
 
 let ingredientList = [];
 let shoppingList = JSON.parse(localStorage.getItem('shoppingList') || '[]');
+let savedRecipes = JSON.parse(localStorage.getItem('savedRecipes') || '[]');
 
 function renderIngredientChips() {
     const displayDiv = document.getElementById('ingredient-list-display');
@@ -44,7 +45,7 @@ function getMaxCalories() {
     return calInput && calInput.value ? parseInt(calInput.value, 10) : null;
 }
 
-let allLoaded = false; // Track if all recipes are loaded
+let allLoaded = false;
 
 async function fetchRecipes(page = 1, append = false) {
     const resultsDiv = document.getElementById('results');
@@ -64,7 +65,6 @@ async function fetchRecipes(page = 1, append = false) {
         const diet = getDietQuery();
         const maxCalories = getMaxCalories();
 
-        // Always use complexSearch for pagination support
         let url = `https://api.spoonacular.com/recipes/complexSearch?apiKey=${SPOONACULAR_KEY}&includeIngredients=${encodeURIComponent(lastQuery)}&number=${RECIPES_PER_PAGE}&offset=${offset}&addRecipeInformation=true`;
         if (diet) url += `&diet=${encodeURIComponent(diet)}`;
         if (maxCalories) url += `&maxCalories=${maxCalories}`;
@@ -77,17 +77,15 @@ async function fetchRecipes(page = 1, append = false) {
             allLoaded = true;
             return;
         }
-        // If appending, don't clear previous results
         recipes.forEach(item => {
             const card = document.createElement('div');
             card.className = 'recipe-item';
-            card.style.height = '420px'; // enforce fixed height
+            card.style.height = '420px';
             const img = document.createElement('img');
             img.src = item.image;
             img.alt = item.title;
             const title = document.createElement('h3');
             title.textContent = item.title;
-            // Remove whiteSpace: nowrap, allow wrapping
             title.style.wordBreak = 'break-word';
             title.style.overflow = 'hidden';
             title.style.textOverflow = 'ellipsis';
@@ -109,7 +107,6 @@ async function fetchRecipes(page = 1, append = false) {
                 missed.className = 'recipe-info';
                 missed.innerHTML = `<b>Calories:</b> ${item.nutrition && item.nutrition.nutrients ? (item.nutrition.nutrients.find(n => n.name === 'Calories')?.amount + ' kcal') : 'N/A'}`;
             }
-            // Remove whiteSpace: nowrap, allow wrapping
             [used, missed].forEach(el => {
                 el.style.wordBreak = 'break-word';
                 el.style.overflow = 'hidden';
@@ -172,12 +169,6 @@ async function fetchRecipes(page = 1, append = false) {
         };
         pagination.appendChild(nextBtn);
 
-        // Infinite scroll/load more style: if you want to append, use this:
-        // nextBtn.onclick = () => {
-        //     fetchRecipes(page + 1, true);
-        //     currentPage = page + 1;
-        // };
-
         if (recipes.length < RECIPES_PER_PAGE) {
             allLoaded = true;
         } else {
@@ -204,15 +195,12 @@ async function displayRecipe(recipeId) {
         const res = await fetch(url);
         const data = await res.json();
         const ingredientsList = data.extendedIngredients.map(i => `<li>${i.original}</li>`).join('');
-        // --- Change instructions rendering here ---
         let instructions = data.instructions || '';
         if (!instructions && data.analyzedInstructions && data.analyzedInstructions.length > 0) {
-            // Render each step as a block with a gap, no dot points
             instructions = data.analyzedInstructions[0].steps.map(
                 s => `<div style="margin-bottom: 18px; text-align:left;">${s.step}</div>`
             ).join('');
         } else if (instructions) {
-            // If instructions is a string, split by line breaks or periods for better display
             const steps = instructions.split(/\r?\n|\.(?=\s[A-Z])/).map(s => s.trim()).filter(Boolean);
             instructions = steps.map(
                 s => `<div style="margin-bottom: 18px; text-align:left;">${s}</div>`
@@ -220,7 +208,6 @@ async function displayRecipe(recipeId) {
         } else {
             instructions = 'No instructions provided.';
         }
-        // --- End change ---
 
         const missingIngredients = data.extendedIngredients
             .filter(i => !ingredientList.includes(i.name.toLowerCase()));
@@ -243,9 +230,15 @@ async function displayRecipe(recipeId) {
             `;
         }
 
+        let saveBtnHtml = `
+            <button id="save-recipe-btn" class="add-to-shopping" style="margin-top:10px;" ${isRecipeSaved(data.id) ? 'disabled' : ''}>
+                ${isRecipeSaved(data.id) ? 'Saved' : 'Save Recipe'}
+            </button>
+        `;
         content.innerHTML = `
             <h2>${data.title}</h2>
             <img src="${data.image}" alt="${data.title}">
+            ${saveBtnHtml}
             <p><b>Ingredients:</b></p>
             <ul style="list-style:none; padding-left:0;">${ingredientsList}</ul>
             ${addMissingBtnHtml}
@@ -265,6 +258,15 @@ async function displayRecipe(recipeId) {
             });
         }
 
+        const saveBtn = document.getElementById('save-recipe-btn');
+        if (saveBtn && !isRecipeSaved(data.id)) {
+            saveBtn.addEventListener('click', function() {
+                saveRecipe({ id: data.id, title: data.title, image: data.image });
+                saveBtn.textContent = 'Saved';
+                saveBtn.disabled = true;
+            });
+        }
+
     } catch (err) {
         content.innerHTML = 'Could not load recipe details.';
         console.error(err);
@@ -276,7 +278,6 @@ function closeRecipeDetails() {
     document.body.style.overflow = '';
 }
 
-// Add event listener to close recipe details when clicking outside modal
 document.addEventListener('mousedown', function (e) {
     const details = document.getElementById('recipe-details');
     const modal = document.getElementById('recipe-modal');
@@ -357,6 +358,62 @@ async function showRandomRecipes() {
     }
 }
 
+function showSavedRecipes() {
+    const resultsDiv = document.getElementById('results');
+    const paginationDiv = document.getElementById('pagination');
+    document.getElementById('random-recipes-section').style.display = 'none';
+    resultsDiv.innerHTML = '';
+    if (paginationDiv) paginationDiv.innerHTML = '';
+    if (!savedRecipes.length) {
+        resultsDiv.textContent = 'No saved recipes.';
+        return;
+    }
+    savedRecipes.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'recipe-item';
+        card.style.height = '420px';
+        const img = document.createElement('img');
+        img.src = item.image;
+        img.alt = item.title;
+        const title = document.createElement('h3');
+        title.textContent = item.title;
+        title.style.wordBreak = 'break-word';
+        title.style.overflow = 'hidden';
+        title.style.textOverflow = 'ellipsis';
+        title.style.maxWidth = '95%';
+
+        const infoContainer = document.createElement('div');
+        infoContainer.style.display = 'flex';
+        infoContainer.style.flexDirection = 'column';
+        infoContainer.style.flexGrow = '1';
+        infoContainer.appendChild(title);
+
+        const btn = document.createElement('button');
+        btn.className = 'view-details-btn';
+        btn.textContent = 'View Details';
+        btn.onclick = async (e) => {
+            e.preventDefault();
+            await displayRecipe(item.id);
+        };
+
+        const removeBtn = document.createElement('button');
+        removeBtn.className = 'add-to-shopping';
+        removeBtn.style.marginTop = '8px';
+        removeBtn.textContent = 'Remove';
+        removeBtn.onclick = (e) => {
+            e.preventDefault();
+            removeSavedRecipe(item.id);
+            showSavedRecipes();
+        };
+
+        card.appendChild(img);
+        card.appendChild(infoContainer);
+        card.appendChild(btn);
+        card.appendChild(removeBtn);
+        resultsDiv.appendChild(card);
+    });
+}
+
 window.searchRecipes = () => fetchRecipes(1);
 window.closeRecipeDetails = closeRecipeDetails;
 
@@ -433,6 +490,11 @@ document.addEventListener('DOMContentLoaded', () => {
             showRandomRecipes();
         });
     }
+
+    const savedBtn = document.getElementById('show-saved-recipes');
+    if (savedBtn) {
+        savedBtn.addEventListener('click', showSavedRecipes);
+    }
 });
 
 function addToShoppingList(ingredient) {
@@ -467,7 +529,6 @@ function showShoppingListModal() {
     document.getElementById('shopping-list-modal').style.display = 'flex';
 }
 
-// Add event listener to close shopping list when clicking outside modal
 document.addEventListener('mousedown', function (e) {
     const modal = document.getElementById('shopping-list-modal');
     if (modal && modal.style.display === 'flex') {
@@ -486,4 +547,24 @@ function removeFromShoppingList(idx) {
     shoppingList.splice(idx, 1);
     localStorage.setItem('shoppingList', JSON.stringify(shoppingList));
     renderShoppingList();
+}
+
+function isRecipeSaved(recipeId) {
+    return savedRecipes.some(r => r.id === recipeId);
+}
+
+function saveRecipe(recipe) {
+    if (!isRecipeSaved(recipe.id)) {
+        savedRecipes.push({
+            id: recipe.id,
+            title: recipe.title,
+            image: recipe.image
+        });
+        localStorage.setItem('savedRecipes', JSON.stringify(savedRecipes));
+    }
+}
+
+function removeSavedRecipe(recipeId) {
+    savedRecipes = savedRecipes.filter(r => r.id !== recipeId);
+    localStorage.setItem('savedRecipes', JSON.stringify(savedRecipes));
 }
