@@ -204,11 +204,23 @@ async function displayRecipe(recipeId) {
         const res = await fetch(url);
         const data = await res.json();
         const ingredientsList = data.extendedIngredients.map(i => `<li>${i.original}</li>`).join('');
+        // --- Change instructions rendering here ---
         let instructions = data.instructions || '';
         if (!instructions && data.analyzedInstructions && data.analyzedInstructions.length > 0) {
-            instructions = '<ol>' + data.analyzedInstructions[0].steps.map(s => `<li>${s.step}</li>`).join('') + '</ol>';
+            // Render each step as a block with a gap, no dot points
+            instructions = data.analyzedInstructions[0].steps.map(
+                s => `<div style="margin-bottom: 18px; text-align:left;">${s.step}</div>`
+            ).join('');
+        } else if (instructions) {
+            // If instructions is a string, split by line breaks or periods for better display
+            const steps = instructions.split(/\r?\n|\.(?=\s[A-Z])/).map(s => s.trim()).filter(Boolean);
+            instructions = steps.map(
+                s => `<div style="margin-bottom: 18px; text-align:left;">${s}</div>`
+            ).join('');
+        } else {
+            instructions = 'No instructions provided.';
         }
-        if (!instructions) instructions = 'No instructions provided.';
+        // --- End change ---
 
         const missingIngredients = data.extendedIngredients
             .filter(i => !ingredientList.includes(i.name.toLowerCase()));
@@ -235,7 +247,7 @@ async function displayRecipe(recipeId) {
             <h2>${data.title}</h2>
             <img src="${data.image}" alt="${data.title}">
             <p><b>Ingredients:</b></p>
-            <ul>${ingredientsList}</ul>
+            <ul style="list-style:none; padding-left:0;">${ingredientsList}</ul>
             ${addMissingBtnHtml}
             ${goToRecipeBtnHtml}
             <p><b>Instructions:</b></p>
@@ -263,6 +275,17 @@ function closeRecipeDetails() {
     document.getElementById('recipe-details').style.display = 'none';
     document.body.style.overflow = '';
 }
+
+// Add event listener to close recipe details when clicking outside modal
+document.addEventListener('mousedown', function (e) {
+    const details = document.getElementById('recipe-details');
+    const modal = document.getElementById('recipe-modal');
+    if (details && details.style.display === 'flex') {
+        if (modal && !modal.contains(e.target)) {
+            closeRecipeDetails();
+        }
+    }
+});
 
 async function fetchIngredientSuggestions(query) {
     if (!query) return [];
@@ -443,6 +466,17 @@ function showShoppingListModal() {
     renderShoppingList();
     document.getElementById('shopping-list-modal').style.display = 'flex';
 }
+
+// Add event listener to close shopping list when clicking outside modal
+document.addEventListener('mousedown', function (e) {
+    const modal = document.getElementById('shopping-list-modal');
+    if (modal && modal.style.display === 'flex') {
+        const content = modal.querySelector('div[style*="background:#fff"]');
+        if (content && !content.contains(e.target)) {
+            closeShoppingListModal();
+        }
+    }
+});
 
 function closeShoppingListModal() {
     document.getElementById('shopping-list-modal').style.display = 'none';
